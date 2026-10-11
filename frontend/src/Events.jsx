@@ -283,11 +283,40 @@ function Events() {
         setBookingMessage("");
     }
 
-    function handleBook(event) {
-        setBookingMessage(
-            `${event.name} — ₹${event.price}. Please log in to continue.`
-        );
+
+    async function handleBook(event) {
+        const token = localStorage.getItem("vibepassToken");
+
+        if (!token) {
+            setBookingMessage("Please log in to continue.");
+            window.location.href = "/login";
+            return;
+        }
+
+        try {
+            setBookingMessage(`Booking ${event.name}...`);
+
+            await axios.post(
+                "https://vibepass-backend-ggb9.onrender.com/api/bookings",
+                {
+                    eventId: event.id
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            setBookingMessage(`Successfully booked ${event.name}!`);
+        } catch (error) {
+            setBookingMessage(
+                error.response?.data?.message ||
+                "Booking failed. Please try again."
+            );
+        }
     }
+
 
     return (
         <div className="events-page">
@@ -302,14 +331,21 @@ function Events() {
                     <a href="/#about">About</a>
                 </div>
 
+
                 <div className="nav-buttons">
                     <Link to="/login" className="login-btn">
-                        Login
+                        User Login
                     </Link>
+
                     <Link to="/register" className="register-btn">
                         Register
                     </Link>
+
+                    <Link to="/admin-login" className="admin-login-btn">
+                        Admin Login
+                    </Link>
                 </div>
+
             </nav>
 
             <main>
@@ -487,6 +523,7 @@ function Events() {
                     <Link to="/events">Events</Link>
                     <Link to="/login">Login</Link>
                     <Link to="/register">Register</Link>
+                    <Link to="/admin-login">Admin Login</Link>
                 </div>
 
                 <p className="copyright">
