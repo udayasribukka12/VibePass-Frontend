@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import "./App.css";
 
@@ -14,15 +15,17 @@ function Home() {
                     <Link to="/">Home</Link>
                     <Link to="/events">Events</Link>
                     <a href="#about">About</a>
-                    <Link to="/dashboard">Dashboard</Link>
                 </div>
 
                 <div className="nav-buttons">
                     <Link to="/login" className="login-btn">
-                        Login
+                        User Login
                     </Link>
                     <Link to="/register" className="register-btn">
                         Register
+                    </Link>
+                    <Link to="/admin-login" className="admin-login-btn">
+                        Admin Login
                     </Link>
                 </div>
             </nav>
@@ -30,7 +33,9 @@ function Home() {
             {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-content">
-                    <span className="hero-badge">YOUR CITY. YOUR VIBE.</span>
+                    <span className="hero-badge">
+                        YOUR CITY. YOUR VIBE.
+                    </span>
 
                     <h1>
                         Discover experiences.
@@ -101,12 +106,16 @@ function Home() {
                 </p>
 
                 <div className="cta-buttons">
-                    <Link to="/events" className="register-btn">
-                        Discover Events
+                    <Link to="/login" className="login-btn">
+                        User Login
                     </Link>
 
-                    <Link to="/register" className="login-btn">
-                        Join VibePass
+                    <Link to="/admin-login" className="admin-login-btn">
+                        Admin Login
+                    </Link>
+
+                    <Link to="/register" className="register-btn">
+                        Create Account
                     </Link>
                 </div>
             </section>
@@ -116,14 +125,18 @@ function Home() {
                 <Link to="/" className="logo">
                     VibePass<span>.</span>
                 </Link>
+                
+                <Link to="/admin-login" className="admin-login-btn">
+    Admin Login
+</Link>
 
                 <p>Discover experiences. Create memories.</p>
 
                 <div className="footer-links">
                     <Link to="/">Home</Link>
                     <Link to="/events">Events</Link>
-                    <Link to="/dashboard">Dashboard</Link>
-                    <Link to="/login">Login</Link>
+                    <Link to="/login">User Login</Link>
+                    <Link to="/admin-login">Admin Login</Link>
                 </div>
 
                 <p className="copyright">

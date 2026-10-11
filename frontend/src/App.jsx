@@ -10,7 +10,7 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 
-import Home from "./Home";
+import Home from "./Home.jsx";
 import Events, { events as sampleEvents } from "./Events";
 import Dashboard from "./Dashboard";
 import MyBookings from "./MyBookings.jsx";
@@ -56,8 +56,34 @@ function getSavedUser() {
     }
 }
 
+// ADMIN LOGIN PAGE
+function AdminLoginPage({ onLogin }) {
+    const navigate = useNavigate();
+
+    return (
+        <div className="auth-page">
+            <div className="auth-card">
+                <h1>Admin Login</h1>
+                <p>Sign in with your authorized administrator account.</p>
+
+                <AuthPage
+                    type="login"
+                    onLogin={onLogin}
+                />
+
+                <button
+                    type="button"
+                    onClick={() => navigate("/")}
+                >
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    );
+}
+
 // LOGIN AND REGISTRATION
-function AuthPage({ type, onLogin }) {
+function AuthPage({ type, onLogin, adminOnly = false }) {
     const navigate = useNavigate();
     const isLogin = type === "login";
 
@@ -114,6 +140,11 @@ function AuthPage({ type, onLogin }) {
 
             if (isLogin) {
                 const token = response.data.token;
+
+                if (adminOnly && String(response.data.role || "").toUpperCase() !== "ADMIN") {
+                    setError("Access denied. This account is not an administrator.");
+                    return;
+                }
 
                 if (!token) {
                     throw new Error(
@@ -643,27 +674,37 @@ function AdminDashboard({ user, onLogout }) {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
 
-    async function loadAdminData() {
-        setLoading(true);
-        setError("");
+
+async function loadAdminData() {
+    setLoading(true);
+    setError("");
+
+    try {
+        const eventResponse = await axios.get(EVENT_API);
+        setEvents(Array.isArray(eventResponse.data) ? eventResponse.data : []);
 
         try {
-            const [eventResponse, bookingResponse] = await Promise.all([
-                axios.get(EVENT_API),
-                axios.get(BOOKING_API)
-            ]);
-
-            setEvents(eventResponse.data);
-            setBookings(bookingResponse.data);
-        } catch (err) {
-            setError(
-                err.response?.data?.message ||
-                "Unable to load dashboard data."
+            const bookingResponse = await axios.get(BOOKING_API);
+            setBookings(
+                Array.isArray(bookingResponse.data)
+                    ? bookingResponse.data
+                    : []
             );
-        } finally {
-            setLoading(false);
+        } catch (bookingError) {
+            setBookings([]);
+            setError(
+                bookingError.response?.status === 403
+                    ? "Access denied while loading bookings. Please check admin authorization."
+                    : "Events loaded, but bookings could not be loaded."
+            );
         }
+    } catch (err) {
+        setError("Unable to load events. Please try again.");
+    } finally {
+        setLoading(false);
     }
+}
+
 
     useEffect(() => {
         loadAdminData();
@@ -899,6 +940,19 @@ function AppRoutes() {
                         user
                             ? <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />
                             : <AuthPage type="login" onLogin={handleLogin} />
+                    }
+                />
+
+                <Route
+                    path="/admin-login"
+                    element={
+                        user
+                            ? <Navigate to={isAdmin ? "/admin" : "/dashboard"} replace />
+                            : <AuthPage
+                                type="login"
+                                onLogin={handleLogin}
+                                adminOnly={true}
+                            />
                     }
                 />
 
